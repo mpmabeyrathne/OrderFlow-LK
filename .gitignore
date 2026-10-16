@@ -1,0 +1,19 @@
+# Dependencies
+# Dependencies — ignore all node_modules folders
+**/node_modules/
+
+# Build output
+dist/
+coverage/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

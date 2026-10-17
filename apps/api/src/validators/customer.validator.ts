@@ -4,9 +4,10 @@ export const createCustomerSchema = z.object({
     name: z.string().trim().min(1, "Name is required"),
 
     email: z
-        .email()
+        .string()
         .trim()
-        .min(1, "Email is required"),
+        .min(1, "Email is required")
+        .pipe(z.email({ error: "Invalid email address" })),
 
     phone: z
         .string()

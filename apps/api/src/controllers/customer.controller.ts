@@ -10,7 +10,7 @@ class CustomerController {
         const customer = await customerService.createCustomer({
             name: name.trim(),
             email: email.trim(),
-            ...(typeof phone === "string" ? { phone: phone.trim() } : {}),
+            phone: phone.trim(),
         });
 
         logger.info({ customerId: customer.id }, "Customer created");
@@ -37,16 +37,6 @@ class CustomerController {
             return res.status(400).json({
                 success: false,
                 message: "Invalid customer ID",
-            });
-        }
-
-        const uuidPattern =
-            /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-        if (!uuidPattern.test(id)) {
-            return res.status(400).json({
-                success: false,
-                message: "Customer ID must be a valid UUID",
             });
         }
 

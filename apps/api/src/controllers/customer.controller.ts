@@ -10,7 +10,7 @@ class CustomerController {
         const customer = await customerService.createCustomer({
             name: name.trim(),
             email: email.trim(),
-            phone: phone.trim(),
+            ...(phone !== undefined ? { phone } : {}),
         });
 
         logger.info({ customerId: customer.id }, "Customer created");
@@ -30,8 +30,8 @@ class CustomerController {
         });
     };
 
-    getCustomerById = async (req: Request, res: Response) => {
-        const { id } = req.params;
+    getCustomerById = async (_req: Request, res: Response) => {
+        const { id } = res.locals.validatedParams;
 
         if (typeof id !== "string") {
             return res.status(400).json({

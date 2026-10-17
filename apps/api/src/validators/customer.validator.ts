@@ -18,7 +18,7 @@ export const createCustomerSchema = z.object({
 export const getCustomerByIdSchema = z.object({
     id: z
         .string()
-        .uuid("Customer ID must be a valid UUID"),
+        .pipe(z.uuid("Customer ID must be a valid UUID")),
 });
 
 export type GetCustomerByIdInput = z.infer<

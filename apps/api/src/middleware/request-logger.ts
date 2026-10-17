@@ -15,7 +15,7 @@ const loggerMiddleware = (req: Request, res: Response, next: NextFunction) => {
             {
                 reqId: requestId,
                 method: req.method,
-                url: req.url,
+                url: req.originalUrl,
                 statusCode: res.statusCode,
                 responseTime: Number(durationInMs.toFixed(2)),
             }

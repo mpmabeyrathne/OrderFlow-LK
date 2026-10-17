@@ -7,18 +7,6 @@ class CustomerController {
     createCustomer = async (req: Request, res: Response) => {
         const { name, email, phone } = req.body ?? {};
 
-        if (
-            typeof name !== "string" ||
-            !name.trim() ||
-            typeof email !== "string" ||
-            !email.trim()
-        ) {
-            return res.status(400).json({
-                success: false,
-                message: "Name and email are required",
-            });
-        }
-
         const customer = await customerService.createCustomer({
             name: name.trim(),
             email: email.trim(),

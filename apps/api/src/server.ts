@@ -4,9 +4,6 @@ import logger from "./config/logger.js";
 import loggerMiddleware from "./middleware/request-logger.js";
 import errorHandler from "./middleware/error-handler.js";
 import { db } from "./config/db.js";
-import { customers } from "./db/schema.js";
-import { query } from "./db/index.js";
-import { eq } from "drizzle-orm";
 import customerRoutes from "./routes/customer.routes.js";
 
 const app: Express = express();
@@ -25,7 +22,7 @@ app.get('/health', (req: Request, res: Response) => {
     })
 })
 
-app.get("/test-error", (req, res, next) => {
+app.get("/test-error", (_req, _res, next) => {
     next(new Error("Test error"));
 });
 
@@ -42,7 +39,6 @@ async function serverStart() {
         logger.info(
             "Database connected successfully",
         );
-
 
         app.listen(PORT, () => {
             logger.info(

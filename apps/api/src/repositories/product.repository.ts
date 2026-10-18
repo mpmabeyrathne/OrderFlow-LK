@@ -1,3 +1,4 @@
+
 import { eq } from "drizzle-orm";
 import { query } from "../db/index.js";
 import { products } from "../db/schema.js";
@@ -19,12 +20,12 @@ export type UpdateProductData = {
 
 class ProductRepository {
     async create(data: CreateProductData) {
-        const [prodcut] = await query
+        const [product] = await query
             .insert(products)
             .values(data)
             .returning();
 
-        return prodcut;
+        return product;
     }
 
     async findAll() {
@@ -32,22 +33,25 @@ class ProductRepository {
     }
 
     async findById(id: string) {
-        const [prodcut] = await query
+        const [product] = await query
             .select()
             .from(products)
             .where(eq(products.id, id))
             .limit(1);
 
-        return prodcut ?? null;
+        return product ?? null;
     }
 
     async updateProduct(id: string, data: UpdateProductData) {
         const [product] = await query
             .update(products)
-            .set(data)
+            .set({
+                ...data,
+                updatedAt: new Date(),
+            })
             .where(eq(products.id, id))
             .returning();
-    
+
         return product ?? null;
     }
 }

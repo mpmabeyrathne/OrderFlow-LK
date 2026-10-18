@@ -1,23 +1,23 @@
-import productRepository, { CreateProductData, UpdateProductData } from "../repositories/product.repository.js";
+
+import productRepository, {
+    type CreateProductData,
+    type UpdateProductData,
+} from "../repositories/product.repository.js";
 
 class ProductService {
-    createProduct = async (data: CreateProductData) => {
-        try {
-            return await productRepository.create(data);
-        } catch (error: unknown) {
-            throw error;
-        }
+    createProduct(data: CreateProductData) {
+        return productRepository.create(data);
     }
 
-    getProducts = async () => {
+    getProducts() {
         return productRepository.findAll();
     }
 
-    getProductById = async (id: string) => {
+    getProductById(id: string) {
         return productRepository.findById(id);
     }
 
-    updateProduct = async (id: string , data : UpdateProductData)=>{
+    updateProduct(id: string, data: UpdateProductData) {
         return productRepository.updateProduct(id, data);
     }
 }

@@ -113,7 +113,8 @@ export const orderItems = pgTable(
     })
       .defaultNow()
       .notNull(),
-      productId: uuid("product_id")
+      
+    productId: uuid("product_id")
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
   },

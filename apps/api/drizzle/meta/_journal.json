@@ -8,6 +8,13 @@
       "when": 1792154938158,
       "tag": "0000_zippy_mantis",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792306962446,
+      "tag": "0001_slim_darkstar",
+      "breakpoints": true
     }
   ]
 }

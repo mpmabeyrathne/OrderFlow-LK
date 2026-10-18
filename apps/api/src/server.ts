@@ -5,6 +5,8 @@ import loggerMiddleware from "./middleware/request-logger.js";
 import errorHandler from "./middleware/error-handler.js";
 import { db } from "./config/db.js";
 import customerRoutes from "./routes/customer.routes.js";
+import productsRoutes from "./routes/product.routes.js";
+
 
 const app: Express = express();
 const PORT: Number = Number(env.PORT);
@@ -28,6 +30,7 @@ app.get("/test-error", (_req, _res, next) => {
 
 //register routes
 app.use("/customers", customerRoutes);
+app.use("/products", productsRoutes);
 
 // error handler should define after routes
 app.use(errorHandler);

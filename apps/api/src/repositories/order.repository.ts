@@ -1,7 +1,8 @@
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, gte, inArray, sql } from "drizzle-orm";
 import { query } from "../db/index.js";
 import { customers, products, orders, orderItems } from "../db/schema.js";
 import type { CreateOrderInput } from "../validators/order.validator.js";
+import { AppError } from "../utils/app-error.js";
 
 class OrderRepository {
   async findCustomerById(customerId: string) {
@@ -31,35 +32,64 @@ class OrderRepository {
       unitPrice: string;
     }[],
   ) {
-    const [order] = await query
-      .insert(orders)
-      .values({
-        customerId: data.customerId,
-        totalAmount,
-      })
-      .returning();
+    return query.transaction(async (tx) => {
+      // 1. Deduct stock inside the transaction
+      for (const item of items) {
+        const [product] = await tx
+          .update(products)
+          .set({
+            stockQuantity: sql`${products.stockQuantity} - ${item.quantity}`,
+            updatedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(products.id, item.productId),
+              gte(products.stockQuantity, item.quantity),
+            ),
+          )
+          .returning({ id: products.id });
 
-    if (!order) {
-      throw new Error("Failed to create order");
-    }
+        if (!product) {
+          throw new AppError(
+            409,
+            `Insufficient stock for ${item.productName}`,
+          );
+        }
+      }
 
-    const createdItems = await query
-      .insert(orderItems)
-      .values(
-        items.map((item) => ({
-          orderId: order.id,
-          productId: item.productId,
-          productName: item.productName,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-        })),
-      )
-      .returning();
+      // 2. Create the order
+      const [order] = await tx
+        .insert(orders)
+        .values({
+          customerId: data.customerId,
+          totalAmount,
+        })
+        .returning();
 
-    return {
-      ...order,
-      items: createdItems,
-    };
+      if (!order) {
+        throw new Error("Failed to create order");
+      }
+
+      // 3. Create order items
+      const createdItems = await tx
+        .insert(orderItems)
+        .values(
+          items.map((item) => ({
+            orderId: order.id,
+            productId: item.productId,
+            productName: item.productName,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+          })),
+        )
+        .returning();
+
+      // 4. Return only after every operation succeeds
+      return {
+        ...order,
+        items: createdItems,
+      };
+    });
   }
 
   async findAll() {
@@ -72,14 +102,14 @@ class OrderRepository {
       .from(orderItems)
       .where(eq(orderItems.orderId, orderId));
   }
-  
+
   async findById(id: string) {
     const [order] = await query
       .select()
       .from(orders)
       .where(eq(orders.id, id))
       .limit(1);
-  
+
     return order ?? null;
   }
 
@@ -92,7 +122,7 @@ class OrderRepository {
       })
       .where(eq(orders.id, id))
       .returning();
-  
+
     return order ?? null;
   }
 }

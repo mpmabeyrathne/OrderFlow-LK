@@ -55,22 +55,6 @@ class OrderService {
       };
     });
 
-    // Deduct stock for each product
-    for (const item of items) {
-      const updatedProduct = await productRepository.decreaseStock(
-        item.productId,
-        item.quantity,
-      );
-
-      if (!updatedProduct) {
-        throw new AppError(
-          409,
-          `Insufficient stock for ${item.productName}`,
-        );
-      }
-    }
-
-    // Create the order after deducting stock
     return orderRepository.createOrder(
       data,
       totalAmount.toFixed(2),

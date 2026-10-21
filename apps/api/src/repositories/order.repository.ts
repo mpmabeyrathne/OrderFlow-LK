@@ -75,6 +75,19 @@ class OrderRepository {
   
     return order ?? null;
   }
+
+  async updateStatus(id: string, status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled") {
+    const [order] = await query
+      .update(orders)
+      .set({
+        status,
+        updatedAt: new Date(),
+      })
+      .where(eq(orders.id, id))
+      .returning();
+  
+    return order ?? null;
+  }
 }
 
 export default new OrderRepository();

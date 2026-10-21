@@ -51,6 +51,26 @@ class OrderController {
       next(error);
     }
   };
+
+  updateStatus = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const { id } = res.locals.validatedParams as { id: string };
+      const { status } = req.body;
+  
+      const order = await orderService.updateStatus(id, status);
+  
+      res.status(200).json({
+        message: "Order status updated successfully",
+        data: order,
+      });
+    } catch (error: unknown) {
+      next(error);
+    }
+  };
   
 }
 

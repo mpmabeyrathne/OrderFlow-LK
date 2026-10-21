@@ -17,7 +17,7 @@ class OrderService {
     const products = await orderRepository.findProductsByIds(productIds);
 
     if (products.length !== productIds.length) {
-      throw new AppError( 404, "One or more products were not found");
+      throw new AppError(404, "One or more products were not found");
     }
 
     const productMap = new Map(
@@ -64,14 +64,27 @@ class OrderService {
   async getOrders() {
     return orderRepository.findAll();
   }
-  
+
   async getOrderById(id: string) {
     const order = await orderRepository.findById(id);
-  
+
     if (!order) {
       throw new AppError(404, "Order not found");
     }
-  
+
+    return order;
+  }
+
+  async updateStatus(
+    id: string,
+    status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled",
+  ) {
+    const order = await orderRepository.updateStatus(id, status);
+
+    if (!order) {
+      throw new AppError(404, "Order not found");
+    }
+
     return order;
   }
 }

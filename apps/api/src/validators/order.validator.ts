@@ -25,6 +25,20 @@ export const getOrderByIdSchema = z.object({
     id: z.uuid("Order ID must be a valid UUID"),
 });
 
-
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
+
+export const updateOrderStatusParamsSchema = z.object({
+    id: z.uuid("Order ID must be a valid UUID"),
+});
+
+export const updateOrderStatusBodySchema = z.object({
+    status: z.enum([
+        "pending",
+        "confirmed",
+        "processing",
+        "shipped",
+        "delivered",
+        "cancelled",
+    ]),
+});
 

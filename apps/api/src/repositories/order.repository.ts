@@ -125,6 +125,65 @@ class OrderRepository {
 
     return order ?? null;
   }
+
+  
+async cancelOrder(id: string) {
+  return query.transaction(async (tx) => {
+    
+    const [order] = await tx
+      .select()
+      .from(orders)
+      .where(eq(orders.id, id))
+      .limit(1)
+      .for("update");
+
+    if (!order) {
+      return null;
+    }
+
+    if (order.status === "cancelled") {
+      return order;
+    }
+
+    const items = await tx
+      .select()
+      .from(orderItems)
+      .where(eq(orderItems.orderId, id));
+
+    for (const item of items) {
+      const [product] = await tx
+        .update(products)
+        .set({
+          stockQuantity: sql`${products.stockQuantity} + ${item.quantity}`,
+          updatedAt: new Date(),
+        })
+        .where(eq(products.id, item.productId))
+        .returning({ id: products.id });
+
+      if (!product) {
+        throw new Error(
+          `Failed to restore stock for product ${item.productId}`,
+        );
+      }
+    }
+
+    const [cancelledOrder] = await tx
+      .update(orders)
+      .set({
+        status: "cancelled",
+        updatedAt: new Date(),
+      })
+      .where(eq(orders.id, id))
+      .returning();
+
+    if (!cancelledOrder) {
+      throw new Error("Failed to cancel order");
+    }
+
+    return cancelledOrder;
+  });
+}
+
 }
 
 export default new OrderRepository();

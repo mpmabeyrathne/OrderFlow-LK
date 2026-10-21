@@ -12,7 +12,7 @@ import {
 } from "../db/schema.js";
 import orderRepository from "./order.repository.js";
 
-describe("OrderRepository.createOrder transaction", () => {
+describe("OrderRepository transactions", () => {
   let customerId: string | undefined;
   let productId: string | undefined;
 
@@ -179,4 +179,61 @@ it("creates an order and deducts stock successfully", async () => {
     expect(savedItems[0]?.quantity).toBe(2);
   });
   
+  
+it("restores stock only once when an order is cancelled twice", async () => {
+    const [customer] = await query.insert(customers).values({
+      name: "Cancellation Test Customer",
+      email: `cancel-${randomUUID()}@example.com`,
+    }).returning();
+  
+    if (!customer) throw new Error("Failed to create test customer");
+    customerId = customer.id;
+  
+    const [product] = await query.insert(products).values({
+      name: "Cancellation Test Product",
+      price: "100.00",
+      stockQuantity: 10,
+      isActive: true,
+    }).returning();
+  
+    if (!product) throw new Error("Failed to create test product");
+    productId = product.id;
+  
+    // Creating the order deducts 2 from stock: 10 -> 8.
+    const order = await orderRepository.createOrder(
+      {
+        customerId: customer.id,
+        items: [{ productId: product.id, quantity: 2 }],
+      },
+      "200.00",
+      [{
+        productId: product.id,
+        productName: product.name,
+        quantity: 2,
+        unitPrice: "100.00",
+      }],
+    );
+  
+    const firstCancellation = await orderRepository.cancelOrder(order.id);
+  
+    expect(firstCancellation?.status).toBe("cancelled");
+  
+    const secondCancellation = await orderRepository.cancelOrder(order.id);
+  
+    expect(secondCancellation?.status).toBe("cancelled");
+  
+    const [stock] = await query.select({
+      stockQuantity: products.stockQuantity,
+    }).from(products).where(eq(products.id, product.id));
+  
+    // Stock should be restored once only: 8 -> 10, not 12.
+    expect(stock?.stockQuantity).toBe(10);
+  
+    const savedOrders = await query.select().from(orders)
+      .where(eq(orders.id, order.id));
+  
+    expect(savedOrders).toHaveLength(1);
+    expect(savedOrders[0]?.status).toBe("cancelled");
+  });
+
 });

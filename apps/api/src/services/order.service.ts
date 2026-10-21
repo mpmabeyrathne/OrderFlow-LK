@@ -76,6 +76,7 @@ class OrderService {
     return order;
   }
 
+
   async updateStatus(
     id: string,
     status:
@@ -86,34 +87,28 @@ class OrderService {
       | "delivered"
       | "cancelled",
   ) {
+    // Cancellation is handled atomically in the repository.
+    if (status === "cancelled") {
+      const cancelledOrder = await orderRepository.cancelOrder(id);
+
+      if (!cancelledOrder) {
+        throw new AppError(404, "Order not found");
+      }
+
+      return cancelledOrder;
+    }
+
     const existingOrder = await orderRepository.findById(id);
 
     if (!existingOrder) {
       throw new AppError(404, "Order not found");
     }
 
-    // Prevent restoring stock more than once
     if (existingOrder.status === "cancelled") {
-      if (status === "cancelled") {
-        return existingOrder;
-      }
-
       throw new AppError(
         400,
         "Cancelled orders cannot be updated",
       );
-    }
-
-    // Restore stock when cancelling an order
-    if (status === "cancelled") {
-      const items = await orderRepository.findItemsByOrderId(id);
-
-      for (const item of items) {
-        await productRepository.increaseStock(
-          item.productId,
-          item.quantity,
-        );
-      }
     }
 
     const updatedOrder = await orderRepository.updateStatus(id, status);
@@ -124,6 +119,7 @@ class OrderService {
 
     return updatedOrder;
   }
+
 }
 
 export default new OrderService();

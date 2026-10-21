@@ -65,6 +65,13 @@ class OrderRepository {
   async findAll() {
     return query.select().from(orders);
   }
+
+  async findItemsByOrderId(orderId: string) {
+    return query
+      .select()
+      .from(orderItems)
+      .where(eq(orderItems.orderId, orderId));
+  }
   
   async findById(id: string) {
     const [order] = await query

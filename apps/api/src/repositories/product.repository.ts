@@ -70,22 +70,35 @@ class ProductRepository {
 
     async decreaseStock(id: string, quantity: number) {
         const [product] = await query
-          .update(products)
-          .set({
-            stockQuantity: sql`${products.stockQuantity} - ${quantity}`,
-            updatedAt: new Date(),
-          })
-          .where(
-            and(
-              eq(products.id, id),
-              gte(products.stockQuantity, quantity),
-            ),
-          )
-          .returning();
-      
+            .update(products)
+            .set({
+                stockQuantity: sql`${products.stockQuantity} - ${quantity}`,
+                updatedAt: new Date(),
+            })
+            .where(
+                and(
+                    eq(products.id, id),
+                    gte(products.stockQuantity, quantity),
+                ),
+            )
+            .returning();
+
         return product ?? null;
-      }
-      
+    }
+
+    async increaseStock(id: string, quantity: number) {
+        const [product] = await query
+            .update(products)
+            .set({
+                stockQuantity: sql`${products.stockQuantity} + ${quantity}`,
+                updatedAt: new Date(),
+            })
+            .where(eq(products.id, id))
+            .returning();
+
+        return product ?? null;
+    }
+
 }
 
 export default new ProductRepository();

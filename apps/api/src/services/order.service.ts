@@ -94,15 +94,51 @@ class OrderService {
 
   async updateStatus(
     id: string,
-    status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled",
+    status:
+      | "pending"
+      | "confirmed"
+      | "processing"
+      | "shipped"
+      | "delivered"
+      | "cancelled",
   ) {
-    const order = await orderRepository.updateStatus(id, status);
+    const existingOrder = await orderRepository.findById(id);
 
-    if (!order) {
+    if (!existingOrder) {
       throw new AppError(404, "Order not found");
     }
 
-    return order;
+    // Prevent restoring stock more than once
+    if (existingOrder.status === "cancelled") {
+      if (status === "cancelled") {
+        return existingOrder;
+      }
+
+      throw new AppError(
+        400,
+        "Cancelled orders cannot be updated",
+      );
+    }
+
+    // Restore stock when cancelling an order
+    if (status === "cancelled") {
+      const items = await orderRepository.findItemsByOrderId(id);
+
+      for (const item of items) {
+        await productRepository.increaseStock(
+          item.productId,
+          item.quantity,
+        );
+      }
+    }
+
+    const updatedOrder = await orderRepository.updateStatus(id, status);
+
+    if (!updatedOrder) {
+      throw new AppError(404, "Order not found");
+    }
+
+    return updatedOrder;
   }
 }
 

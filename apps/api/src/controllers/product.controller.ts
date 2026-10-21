@@ -93,6 +93,26 @@ class ProductController {
             return next(error);
         }
     };
+
+    updateStock = async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+      ) => {
+        try {
+          const { id } = res.locals.validatedParams as { id: string };
+          const { stockQuantity } = req.body;
+      
+          const product = await productService.updateStock(id, stockQuantity);
+      
+          res.status(200).json({
+            message: "Product stock updated successfully",
+            data: product,
+          });
+        } catch (error: unknown) {
+          next(error);
+        }
+      };
 }
 
 export default new ProductController();

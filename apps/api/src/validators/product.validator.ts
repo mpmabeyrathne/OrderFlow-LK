@@ -58,6 +58,13 @@ export const updateProductSchema = z
         "At least one field must be provided",
     );
 
+export const updateStockSchema = z.object({
+    stockQuantity: z
+        .number()
+        .int("Stock quantity must be an integer")
+        .min(0, "Stock quantity cannot be negative"),
+});
+
 export type GetProductByIdInput = z.infer<
     typeof getProductByIdSchema
 >;

@@ -1,5 +1,5 @@
 
-import { eq } from "drizzle-orm";
+import { and, eq, gte, inArray, sql } from "drizzle-orm";
 import { query } from "../db/index.js";
 import { products } from "../db/schema.js";
 
@@ -54,6 +54,38 @@ class ProductRepository {
 
         return product ?? null;
     }
+
+    async updateStock(id: string, stockQuantity: number) {
+        const [product] = await query
+            .update(products)
+            .set({
+                stockQuantity,
+                updatedAt: new Date(),
+            })
+            .where(eq(products.id, id))
+            .returning();
+
+        return product ?? null;
+    }
+
+    async decreaseStock(id: string, quantity: number) {
+        const [product] = await query
+          .update(products)
+          .set({
+            stockQuantity: sql`${products.stockQuantity} - ${quantity}`,
+            updatedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(products.id, id),
+              gte(products.stockQuantity, quantity),
+            ),
+          )
+          .returning();
+      
+        return product ?? null;
+      }
+      
 }
 
 export default new ProductRepository();

@@ -6,6 +6,7 @@ import {
     createProductSchema,
     getProductByIdSchema,
     updateProductSchema,
+    updateStockSchema,
 } from "../validators/product.validator.js";
 import productController from "../controllers/product.controller.js";
 
@@ -31,5 +32,12 @@ router.patch(
     validateBody(updateProductSchema),
     productController.updateProduct,
 );
+
+router.patch(
+    "/:id/stock",
+    validateParams(getProductByIdSchema),
+    validateBody(updateStockSchema),
+    productController.updateStock,
+  );
 
 export default router;

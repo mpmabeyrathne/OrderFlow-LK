@@ -1,6 +1,7 @@
 import orderRepository from "../repositories/order.repository.js";
 import type { CreateOrderInput } from "../validators/order.validator.js";
 import { AppError } from "../utils/app-error.js";
+import productRepository from "../repositories/product.repository.js";
 
 class OrderService {
   async createOrder(data: CreateOrderInput) {
@@ -54,6 +55,22 @@ class OrderService {
       };
     });
 
+    // Deduct stock for each product
+    for (const item of items) {
+      const updatedProduct = await productRepository.decreaseStock(
+        item.productId,
+        item.quantity,
+      );
+
+      if (!updatedProduct) {
+        throw new AppError(
+          409,
+          `Insufficient stock for ${item.productName}`,
+        );
+      }
+    }
+
+    // Create the order after deducting stock
     return orderRepository.createOrder(
       data,
       totalAmount.toFixed(2),

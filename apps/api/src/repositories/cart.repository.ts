@@ -6,7 +6,7 @@ import { AppError } from "../utils/app-error.js";
 const MAX_ITEMS = 50;
 
 function cents(price: string): bigint {
-  const match = /^(\\d+)(?:\\.(\\d{1,2}))?$/.exec(price);
+  const match = /^(\d+)(?:\.(\d{1,2}))?$/.exec(price);
   if (!match) throw new Error("Invalid stored product price");
   return BigInt(match[1]!) * 100n + BigInt((match[2] ?? "").padEnd(2, "0"));
 }

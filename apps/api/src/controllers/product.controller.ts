@@ -101,9 +101,9 @@ class ProductController {
       ) => {
         try {
           const { id } = res.locals.validatedParams as { id: string };
-          const { stockQuantity } = req.body;
+          const { stockQuantity, expectedStockQuantity } = req.body;
       
-          const product = await productService.updateStock(id, stockQuantity);
+          const product = await productService.updateStock(id, stockQuantity, expectedStockQuantity);
       
           res.status(200).json({
             message: "Product stock updated successfully",

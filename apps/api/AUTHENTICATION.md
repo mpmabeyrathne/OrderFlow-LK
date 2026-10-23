@@ -49,3 +49,18 @@ Never run DB-backed tests against production. If changing branches locally, pull
 
 ## Verification
 Run `pnpm --filter @orderflow/api typecheck` and `pnpm --filter @orderflow/api test` with a **dedicated test DB**. Existing transaction integration tests use DB_URL and write test records. Do not point tests at production DB.
+
+## HTTP authentication acceptance suite
+The suite `src/integration/auth.acceptance.test.ts` sends real HTTP requests to an ephemeral local Express server, uses the linked PostgreSQL database, and cleans up its unique test accounts, orders and products. It covers registration, duplicate signup, correct/wrong login, authenticated profile, RBAC and order ownership, and both admin/manager operations.
+
+Use a separate **migrated disposable database**. Add `TEST_DB_URL` to `apps/api/.env`, different from `DB_URL`. Vitest's integration setup refuses to run without it or if the two URLs match. The tests use TEST_DB_URL; do not point it at a real shared/production database.
+
+From repository root:
+```sh
+pnpm --filter @orderflow/api test:acceptance
+pnpm --filter @orderflow/api test:integration
+```
+The first runs the acceptance suite only; the second runs both the order repository integration tests and authentication acceptance tests. The ordinary `test` command remains unit-only.
+
+If running on PowerShell and TEST_DB_URL is not in your .env file, provide it as an environment variable for the current session (do not commit it). Apply Drizzle migrations to that test database first.
+

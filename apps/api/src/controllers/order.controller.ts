@@ -28,10 +28,7 @@ class OrderController {
     next: NextFunction,
   ) => {
     try {
-      const orders = await orderService.getOrders();
-      const visible = req.auth!.role === "customer"
-        ? orders.filter(order => order.customerId === req.auth!.customerId)
-        : orders;
+      const visible = await orderService.getOrders(req.auth!.role === "customer" ? req.auth!.customerId! : undefined);
   
       res.status(200).json({
         data: visible,
@@ -48,10 +45,7 @@ class OrderController {
   ) => {
     try {
       const { id } = res.locals.validatedParams as { id: string };
-      const order = await orderService.getOrderById(id);
-      if (req.auth!.role === "customer" && order.customerId !== req.auth!.customerId) {
-        return res.status(403).json({ success: false, message: "Forbidden" });
-      }
+      const order = await orderService.getOrderById(id, req.auth!.role === "customer" ? req.auth!.customerId! : undefined);
   
       res.status(200).json({
         data: order,

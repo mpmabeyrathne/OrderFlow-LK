@@ -26,10 +26,6 @@ app.get('/health', (req: Request, res: Response) => {
     })
 })
 
-app.get("/test-error", (_req, _res, next) => {
-    next(new Error("Test error"));
-});
-
 //register routes
 app.use("/auth", authRoutes);
 app.use("/customers", customerRoutes);

@@ -41,7 +41,11 @@ vi.mock("../services/product.service.js", () => ({
     getProducts: vi.fn(async () => []),
     getProductById: vi.fn(async () => ({ id: productId })),
     updateProduct: vi.fn(async (id: string, data: object) => ({ id, ...data })),
-    updateStock: vi.fn(async (id: string, stockQuantity: number) => {
+    updateStock: vi.fn(async (id: string, stockQuantity: number, expectedStockQuantity: number) => {
+      if (state.stock !== expectedStockQuantity) {
+        const { AppError } = await import("../utils/app-error.js");
+        throw new AppError(409, "Stock has changed");
+      }
       state.stock = stockQuantity;
       return { id, stockQuantity };
     }),
@@ -182,7 +186,7 @@ describe("Auth acceptance (HTTP with in-memory persistence)", () => {
 
   it("7. customer cannot update stock -> 403", async () => {
     const res = await request("PATCH", `/products/${productId}/stock`,
-      { stockQuantity: 99 }, owner.token);
+      { stockQuantity: 99, expectedStockQuantity: 30 }, owner.token);
     expect(res.status).toBe(403);
     expect(state.stock).toBe(30);
   });

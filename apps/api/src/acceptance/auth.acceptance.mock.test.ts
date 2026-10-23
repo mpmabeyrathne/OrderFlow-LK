@@ -203,6 +203,38 @@ describe("Auth acceptance (HTTP with in-memory persistence)", () => {
     expect(res.status).toBe(403);
   });
 
+  it("11. rejects stale stock update -> 409 without overwriting stock", async () => {
+    const first = await request("PATCH", `/products/${productId}/stock`, {
+      stockQuantity: 24, expectedStockQuantity: 30,
+    }, adminToken);
+    expect(first.status).toBe(200);
+    const second = await request("PATCH", `/products/${productId}/stock`, {
+      stockQuantity: 18, expectedStockQuantity: 30,
+    }, managerToken);
+    expect(second.status).toBe(409);
+    expect(state.stock).toBe(24);
+    const restore = await request("PATCH", `/products/${productId}/stock`, {
+      stockQuantity: 30, expectedStockQuantity: 24,
+    }, adminToken);
+    expect(restore.status).toBe(200);
+  });
+
+  it("12. rejects staff stock update with missing expected quantity -> 400", async () => {
+    const result = await request("PATCH", `/products/${productId}/stock`, {
+      stockQuantity: 100,
+    }, adminToken);
+    expect(result.status).toBe(400);
+    expect(state.stock).toBe(30);
+  });
+
+  it("13. rejects negative stock adjustment -> 400", async () => {
+    const result = await request("PATCH", `/products/${productId}/stock`, {
+      stockQuantity: -1, expectedStockQuantity: 30,
+    }, adminToken);
+    expect(result.status).toBe(400);
+    expect(state.stock).toBe(30);
+  });
+
   it.each([
     ["admin", () => adminToken],
     ["manager", () => managerToken],

@@ -1,10 +1,15 @@
-// Runs before any application imports. Prevents HTTP integration tests from
-// accidentally using the normal DB_URL loaded by the development environment.
+import dotenv from "dotenv";
+dotenv.config({ quiet: true });
+
+// Fail closed: tests must point at an explicitly supplied, isolated database.
 const testDatabaseUrl = process.env.TEST_DB_URL;
 if (!testDatabaseUrl) {
-  throw new Error("TEST_DB_URL is required for integration tests. Use a separate migrated test database.");
+  throw new Error("TEST_DB_URL is required. Use a separate migrated test database.");
 }
 if (testDatabaseUrl === process.env.DB_URL) {
-  throw new Error("TEST_DB_URL must not equal DB_URL; refusing to use the development database.");
+  throw new Error("TEST_DB_URL must differ from DB_URL (development database).");
+}
+if (!/^postgres(ql)?:\/\//.test(testDatabaseUrl)) {
+  throw new Error("TEST_DB_URL must be a PostgreSQL connection URL.");
 }
 process.env.DB_URL = testDatabaseUrl;

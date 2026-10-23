@@ -13,7 +13,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "test:integration": "vitest run --config vitest.integration.config.ts",
-    "test:acceptance": "vitest run --config vitest.integration.config.ts src/integration/auth.acceptance.test.ts"
+    "test:acceptance": "vitest run --config vitest.integration.config.ts src/integration/auth.acceptance.test.ts",
+    "test:acceptance:mock": "vitest run src/acceptance/auth.acceptance.mock.test.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",

@@ -92,8 +92,9 @@ class OrderRepository {
     });
   }
 
-  async findAll() {
-    return query.select().from(orders);
+  async findAll(customerId?: string) {
+    const statement = query.select().from(orders);
+    return customerId ? statement.where(eq(orders.customerId, customerId)) : statement;
   }
 
   async findItemsByOrderId(orderId: string) {
@@ -103,11 +104,11 @@ class OrderRepository {
       .where(eq(orderItems.orderId, orderId));
   }
 
-  async findById(id: string) {
+  async findById(id: string, customerId?: string) {
     const [order] = await query
       .select()
       .from(orders)
-      .where(eq(orders.id, id))
+      .where(customerId ? and(eq(orders.id, id), eq(orders.customerId, customerId)) : eq(orders.id, id))
       .limit(1);
 
     return order ?? null;

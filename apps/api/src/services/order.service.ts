@@ -62,12 +62,12 @@ class OrderService {
     );
   }
 
-  async getOrders() {
-    return orderRepository.findAll();
+  async getOrders(customerId?: string) {
+    return orderRepository.findAll(customerId);
   }
 
-  async getOrderById(id: string) {
-    const order = await orderRepository.findById(id);
+  async getOrderById(id: string, customerId?: string) {
+    const order = await orderRepository.findById(id, customerId);
 
     if (!order) {
       throw new AppError(404, "Order not found");

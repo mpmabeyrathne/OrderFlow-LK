@@ -8,6 +8,9 @@ class OrderController {
     next: NextFunction,
   ) => {
     try {
+      if (req.auth!.role === "customer" && req.body.customerId !== req.auth!.customerId) {
+        return res.status(403).json({ success: false, message: "Forbidden" });
+      }
       const order = await orderService.createOrder(req.body);
 
       res.status(201).json({
@@ -25,10 +28,10 @@ class OrderController {
     next: NextFunction,
   ) => {
     try {
-      const orders = await orderService.getOrders();
+      const visible = await orderService.getOrders(req.auth!.role === "customer" ? req.auth!.customerId! : undefined);
   
       res.status(200).json({
-        data: orders,
+        data: visible,
       });
     } catch (error: unknown) {
       next(error);
@@ -42,7 +45,7 @@ class OrderController {
   ) => {
     try {
       const { id } = res.locals.validatedParams as { id: string };
-      const order = await orderService.getOrderById(id);
+      const order = await orderService.getOrderById(id, req.auth!.role === "customer" ? req.auth!.customerId! : undefined);
   
       res.status(200).json({
         data: order,

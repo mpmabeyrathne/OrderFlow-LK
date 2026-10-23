@@ -10,10 +10,13 @@ import {
 } from "../validators/product.validator.js";
 import productController from "../controllers/product.controller.js";
 
+import { authenticate, authorize } from "../middleware/auth.js";
 const router = Router();
 
 router.post(
     "/",
+    authenticate,
+    authorize("admin", "manager"),
     validateBody(createProductSchema),
     productController.createProduct,
 );
@@ -28,6 +31,8 @@ router.get(
 
 router.patch(
     "/:id",
+    authenticate,
+    authorize("admin", "manager"),
     validateParams(getProductByIdSchema),
     validateBody(updateProductSchema),
     productController.updateProduct,
@@ -35,6 +40,8 @@ router.patch(
 
 router.patch(
     "/:id/stock",
+    authenticate,
+    authorize("admin", "manager"),
     validateParams(getProductByIdSchema),
     validateBody(updateStockSchema),
     productController.updateStock,

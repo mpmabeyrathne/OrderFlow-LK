@@ -24,6 +24,7 @@ router.get(
 
 router.patch(
   "/:id/status",
+  authorize("admin", "manager"),
   validateParams(updateOrderStatusParamsSchema),
   validateBody(updateOrderStatusBodySchema),
   orderController.updateStatus,

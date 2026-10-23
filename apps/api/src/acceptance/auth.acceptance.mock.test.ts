@@ -41,7 +41,11 @@ vi.mock("../services/product.service.js", () => ({
     getProducts: vi.fn(async () => []),
     getProductById: vi.fn(async () => ({ id: productId })),
     updateProduct: vi.fn(async (id: string, data: object) => ({ id, ...data })),
-    updateStock: vi.fn(async (id: string, stockQuantity: number) => {
+    updateStock: vi.fn(async (id: string, stockQuantity: number, expectedStockQuantity: number) => {
+      if (state.stock !== expectedStockQuantity) {
+        const { AppError } = await import("../utils/app-error.js");
+        throw new AppError(409, "Stock has changed");
+      }
       state.stock = stockQuantity;
       return { id, stockQuantity };
     }),
@@ -182,7 +186,7 @@ describe("Auth acceptance (HTTP with in-memory persistence)", () => {
 
   it("7. customer cannot update stock -> 403", async () => {
     const res = await request("PATCH", `/products/${productId}/stock`,
-      { stockQuantity: 99 }, owner.token);
+      { stockQuantity: 99, expectedStockQuantity: 30 }, owner.token);
     expect(res.status).toBe(403);
     expect(state.stock).toBe(30);
   });
@@ -199,6 +203,38 @@ describe("Auth acceptance (HTTP with in-memory persistence)", () => {
     expect(res.status).toBe(403);
   });
 
+  it("11. rejects stale stock update -> 409 without overwriting stock", async () => {
+    const first = await request("PATCH", `/products/${productId}/stock`, {
+      stockQuantity: 24, expectedStockQuantity: 30,
+    }, adminToken);
+    expect(first.status).toBe(200);
+    const second = await request("PATCH", `/products/${productId}/stock`, {
+      stockQuantity: 18, expectedStockQuantity: 30,
+    }, managerToken);
+    expect(second.status).toBe(409);
+    expect(state.stock).toBe(24);
+    const restore = await request("PATCH", `/products/${productId}/stock`, {
+      stockQuantity: 30, expectedStockQuantity: 24,
+    }, adminToken);
+    expect(restore.status).toBe(200);
+  });
+
+  it("12. rejects staff stock update with missing expected quantity -> 400", async () => {
+    const result = await request("PATCH", `/products/${productId}/stock`, {
+      stockQuantity: 100,
+    }, adminToken);
+    expect(result.status).toBe(400);
+    expect(state.stock).toBe(30);
+  });
+
+  it("13. rejects negative stock adjustment -> 400", async () => {
+    const result = await request("PATCH", `/products/${productId}/stock`, {
+      stockQuantity: -1, expectedStockQuantity: 30,
+    }, adminToken);
+    expect(result.status).toBe(400);
+    expect(state.stock).toBe(30);
+  });
+
   it.each([
     ["admin", () => adminToken],
     ["manager", () => managerToken],
@@ -209,6 +245,7 @@ describe("Auth acceptance (HTTP with in-memory persistence)", () => {
     }, token)).status).toBe(200);
     expect((await request("PATCH", `/products/${productId}/stock`, {
       stockQuantity: 30,
+      expectedStockQuantity: 30,
     }, token)).status).toBe(200);
     const res = await request("PATCH", `/orders/${foreignOrderId}/status`,
       { status: "confirmed" }, token);

@@ -55,14 +55,14 @@ class ProductRepository {
         return product ?? null;
     }
 
-    async updateStock(id: string, stockQuantity: number) {
+    async updateStock(id: string, stockQuantity: number, expectedStockQuantity: number) {
         const [product] = await query
             .update(products)
             .set({
                 stockQuantity,
                 updatedAt: new Date(),
             })
-            .where(eq(products.id, id))
+            .where(and(eq(products.id, id), eq(products.stockQuantity, expectedStockQuantity)))
             .returning();
 
         return product ?? null;

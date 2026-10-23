@@ -63,7 +63,11 @@ export const updateStockSchema = z.object({
         .number()
         .int("Stock quantity must be an integer")
         .min(0, "Stock quantity cannot be negative"),
-});
+    expectedStockQuantity: z
+        .number()
+        .int("Expected stock quantity must be an integer")
+        .min(0, "Expected stock quantity cannot be negative"),
+}).strict();
 
 export type GetProductByIdInput = z.infer<
     typeof getProductByIdSchema

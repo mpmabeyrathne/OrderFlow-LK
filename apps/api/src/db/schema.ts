@@ -14,6 +14,17 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 
+export const userRoleEnum = pgEnum("user_role", ["customer", "admin", "manager"]);
+export type UserRole = "customer" | "admin" | "manager";
+export const users = pgTable("users", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  role: userRoleEnum("role").default("customer").notNull(),
+  customerId: uuid("customer_id").unique().references(() => customers.id, { onDelete: "restrict" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [check("users_role_customer_link_check", sql`(${table.role} = 'customer' AND ${table.customerId} IS NOT NULL) OR (${table.role} <> 'customer' AND ${table.customerId} IS NULL)`)]);
 export const orderStatusEnum = pgEnum("order_status", [
   "pending",
   "confirmed",

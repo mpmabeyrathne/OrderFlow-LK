@@ -15,6 +15,13 @@
       "when": 1792306962446,
       "tag": "0001_slim_darkstar",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792750000000,
+      "tag": "0002_auth_users",
+      "breakpoints": true
     }
   ]
 }

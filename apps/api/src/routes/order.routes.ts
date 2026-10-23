@@ -4,7 +4,9 @@ import { validateBody } from "../middleware/validate-body.js";
 import { createOrderSchema, getOrderByIdSchema, updateOrderStatusBodySchema, updateOrderStatusParamsSchema } from "../validators/order.validator.js";
 import { validateParams } from "../middleware/validate-params.js";
 
+import { authenticate, authorize } from "../middleware/auth.js";
 const router = Router();
+router.use(authenticate);
 
 router.post(
   "/",

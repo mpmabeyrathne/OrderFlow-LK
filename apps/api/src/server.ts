@@ -7,6 +7,7 @@ import { db } from "./config/db.js";
 import customerRoutes from "./routes/customer.routes.js";
 import productsRoutes from "./routes/product.routes.js";
 import orderRoutes from "./routes/order.routes.js";
+import authRoutes from "./routes/auth.routes.js";
 
 
 const app: Express = express();
@@ -30,6 +31,7 @@ app.get("/test-error", (_req, _res, next) => {
 });
 
 //register routes
+app.use("/auth", authRoutes);
 app.use("/customers", customerRoutes);
 app.use("/products", productsRoutes);
 app.use("/orders", orderRoutes);

@@ -64,3 +64,10 @@ The first runs the acceptance suite only; the second runs both the order reposit
 
 If running on PowerShell and TEST_DB_URL is not in your .env file, provide it as an environment variable for the current session (do not commit it). Apply Drizzle migrations to that test database first.
 
+
+## No-database acceptance tests (quick start)
+If you don't want to set up TEST_DB_URL yet, run from the repository root:
+```sh
+pnpm --filter @orderflow/api test:acceptance:mock
+```
+These HTTP tests use the real Express routes, token/password functions and authorization middleware, but **mock the persistence and business services** with temporary in-memory data. No PostgreSQL database is created or modified. They test the requested response/status security cases but **do not verify real DB queries, transactions or migrations**; use `test:acceptance` with TEST_DB_URL later for full integration confidence.

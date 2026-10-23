@@ -166,6 +166,10 @@ describe("Authentication acceptance tests (HTTP + PostgreSQL)", () => {
     ["manager", () => managerToken],
   ] as const)("10. %s can update products and order status -> 200", async (_role, tokenForRole) => {
     const token = tokenForRole();
+    const product = await api("PATCH", `/products/${productId}`, {
+      description: "Updated during staff authorization test",
+    }, token);
+    expect(product.status).toBe(200);
     const stock = await api("PATCH", `/products/${productId}/stock`, { stockQuantity: 30 }, token);
     expect(stock.status).toBe(200);
     const status = await api("PATCH", `/orders/${foreignOrderId}/status`,

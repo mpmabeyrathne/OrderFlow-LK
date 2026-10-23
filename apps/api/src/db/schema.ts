@@ -11,6 +11,7 @@ import {
   index,
   check,
   boolean,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 
@@ -25,6 +26,19 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 }, (table) => [check("users_role_customer_link_check", sql`(${table.role} = 'customer' AND ${table.customerId} IS NOT NULL) OR (${table.role} <> 'customer' AND ${table.customerId} IS NULL)`)]);
+export const cartItems = pgTable("cart_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
+  quantity: integer("quantity").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("cart_items_user_product_unique").on(table.userId, table.productId),
+  index("cart_items_user_idx").on(table.userId),
+  check("cart_items_quantity_positive", sql`${table.quantity} > 0 AND ${table.quantity} <= 100`),
+]);
+
 export const orderStatusEnum = pgEnum("order_status", [
   "pending",
   "confirmed",

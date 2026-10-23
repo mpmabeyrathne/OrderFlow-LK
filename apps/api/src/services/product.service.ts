@@ -22,11 +22,14 @@ class ProductService {
         return productRepository.updateProduct(id, data);
     }
 
-    async updateStock(id: string, stockQuantity: number) {
-        const product = await productRepository.updateStock(id, stockQuantity);
+    async updateStock(id: string, stockQuantity: number, expectedStockQuantity: number) {
+        const product = await productRepository.updateStock(id, stockQuantity, expectedStockQuantity);
       
         if (!product) {
-          throw new AppError(404,"Product not found");
+          // Failed compare-and-swap: product was deleted or stock changed after the client read it.
+          const existing = await productRepository.findById(id);
+          if (!existing) throw new AppError(404, "Product not found");
+          throw new AppError(409, "Stock has changed. Refresh the product and retry.");
         }
       
         return product;

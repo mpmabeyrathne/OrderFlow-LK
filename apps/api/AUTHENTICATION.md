@@ -35,5 +35,17 @@ Passwords are salted and hashed with Node scrypt. JWTs use HS256 with explicit a
 
 Not included: refresh tokens, password reset, email verification, MFA, account lockout, request-rate limiting, or administrative provisioning. Run behind TLS and apply rate limiting before production exposure.
 
+## Test commands
+From the repository root:
+```sh
+pnpm --filter @orderflow/api typecheck
+pnpm --filter @orderflow/api test
+```
+The default Vitest configuration includes source unit tests, excludes compiled `dist` output, and excludes the database-backed order repository suite. For database integration tests, explicitly configure `DB_URL` for a dedicated, disposable test database, apply migrations, and run:
+```sh
+pnpm --filter @orderflow/api test:integration
+```
+Never run DB-backed tests against production. If changing branches locally, pull the latest feature branch before running commands.
+
 ## Verification
 Run `pnpm --filter @orderflow/api typecheck` and `pnpm --filter @orderflow/api test` with a **dedicated test DB**. Existing transaction integration tests use DB_URL and write test records. Do not point tests at production DB.

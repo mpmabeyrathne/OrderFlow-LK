@@ -245,6 +245,7 @@ describe("Auth acceptance (HTTP with in-memory persistence)", () => {
     }, token)).status).toBe(200);
     expect((await request("PATCH", `/products/${productId}/stock`, {
       stockQuantity: 30,
+      expectedStockQuantity: 30,
     }, token)).status).toBe(200);
     const res = await request("PATCH", `/orders/${foreignOrderId}/status`,
       { status: "confirmed" }, token);

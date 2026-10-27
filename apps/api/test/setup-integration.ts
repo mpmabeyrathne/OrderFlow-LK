@@ -12,4 +12,11 @@ if (testDatabaseUrl === process.env.DB_URL) {
 if (!/^postgres(ql)?:\/\//.test(testDatabaseUrl)) {
   throw new Error("TEST_DB_URL must be a PostgreSQL connection URL.");
 }
+const dbHost = new URL(testDatabaseUrl).hostname.toLowerCase();
+if (!dbHost || dbHost.includes("your_test_database_connection") || dbHost.includes("placeholder") ||
+    ["example.com", "localhost", "127.0.0.1"].includes(dbHost)) {
+  throw new Error(
+    "TEST_DB_URL points to a placeholder or unsupported host. Use a separate, real, migrated Neon test database."
+  );
+}
 process.env.DB_URL = testDatabaseUrl;

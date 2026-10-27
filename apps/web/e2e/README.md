@@ -12,7 +12,7 @@ pnpm --filter @orderflow/web exec playwright install chromium
 pnpm --filter @orderflow/web test:e2e
 ```
 
-The Playwright config starts the Next.js dev server automatically if port 3001 is unused. No API or test database is needed for these mock-based UI tests.
+Playwright starts its **own** Next.js dev server at `http://127.0.0.1:3101` and does not reuse the storefront server at port 3001. No API or test database is needed for these mock-based UI tests.
 
 ## Run individual tests
 
@@ -31,3 +31,13 @@ pnpm --filter @orderflow/web exec playwright show-report
 - Customer sign-in, Redux session and cart display
 
 The mock tests demonstrate UI behavior, not PostgreSQL transaction correctness. Add a separate live-API smoke suite only if a safe set of development test records is available.
+
+## Investigating failures
+
+Run the focused browser diagnostic first:
+
+```powershell
+pnpm --filter @orderflow/web exec playwright test e2e/diagnostics.spec.ts --project=chromium --workers=1
+```
+
+If it fails, the diagnostic prints browser JavaScript errors, observed `/backend/*` requests, and visible page text. Check the trace and screenshot in `apps/web/test-results`. Stop existing Next.js servers if they hold stale `.next` build artifacts, and confirm you pulled the latest `feature/nextjs-redux-web` branch.

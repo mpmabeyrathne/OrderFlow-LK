@@ -31,7 +31,7 @@ class ProductRepository {
 
     async findAll(filters: ProductListQuery) {
         const conditions: SQL[] = [];
-        if (filters.search) conditions.push(ilike(products.name, "%" + filters.search.replace(/[\\%_]/g, "\\\\    async findAll() {
+        if (filters.search) conditions.push(ilike(products.name, "%" + filters.search.replace(/[\\%_]/g, (char) => "\\" + char) + "%"));
         return query.select().from(products);
     }") + "%"));
         if (filters.isActive) conditions.push(eq(products.isActive, filters.isActive === "true"));

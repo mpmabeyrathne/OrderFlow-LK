@@ -104,7 +104,7 @@ test("checkout failure keeps cart visible and displays a message", async ({ page
   );
   await page.goto("/cart");
   await page.getByRole("button", { name: /place demo order/i }).click();
-  await expect(page.getByRole("alert")).toContainText("Insufficient stock");
+  await expect(page.locator(".message[role=alert]")).toContainText("Insufficient stock");
   await expect(page.getByText(product.name)).toBeVisible();
 });
 

@@ -19,7 +19,7 @@ const order = {
   status: "pending",
   createdAt: "2026-10-27T09:00:00.000Z",
 };
-async function session(page: Page, user: typeof manager) {
+async function session(page: Page, user: { userId: string; customerId: string | null; role: "customer" | "manager" | "admin" }) {
   await page.addInitScript(() => sessionStorage.setItem("orderflow_token", "pw-role-token"));
   await page.route(/\/backend\/auth\/me$/, route =>
     route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true, data: user }) }),

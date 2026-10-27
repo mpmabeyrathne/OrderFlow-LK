@@ -11,7 +11,7 @@ export const product = {
 };
 
 export async function mockCatalog(page: Page, items = [product]) {
-  await page.route("**/backend/products?*", async (route) => {
+  await page.route(/\/backend\/products(?:\?.*)?$/, async (route) => {
     const url = new URL(route.request().url());
     const search = (url.searchParams.get("search") ?? "").toLowerCase();
     const filtered = items.filter(p => p.name.toLowerCase().includes(search));
@@ -25,4 +25,15 @@ export async function mockCatalog(page: Page, items = [product]) {
       }),
     });
   });
+}
+
+export function captureClientErrors(page: Page) {
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  page.on("console", message => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  return () => {
+    if (errors.length) throw new Error("Browser errors:\n" + errors.join("\n"));
+  };
 }

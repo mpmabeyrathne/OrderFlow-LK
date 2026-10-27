@@ -6,7 +6,7 @@
 - Migrate the intended development DB: `pnpm --filter @orderflow/api db:migrate`.
 - Run locally: `pnpm --filter @orderflow/api dev`.
 - Static checks: `pnpm --filter @orderflow/api typecheck`, `pnpm --filter @orderflow/api test`, `pnpm --filter @orderflow/api build`.
-- Test DB integration: provision **separate migrated** PostgreSQL instance, assign `TEST_DB_URL` (must be different from `DB_URL`), and run `pnpm --filter @orderflow/api test:integration`. Tests create and delete seed records.
+- Optional only: integration testing requires a separate migrated PostgreSQL database and `TEST_DB_URL` distinct from development `DB_URL`. For this CV portfolio, use the mock suite and build as your baseline. Do not run destructive integration tests against the development database.
 
 ## API and monitoring
 - `GET /health`: process-level health; note this does **not** query PostgreSQL for readiness.

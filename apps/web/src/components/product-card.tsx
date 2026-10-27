@@ -34,7 +34,7 @@ export function ProductCard({product}:{product:Product}) {
   }
   return <article className="product-card">
     <Link href={"/product/"+product.id} className="product-image" aria-label={"View "+product.name}>
-      <span aria-hidden>{productEmoji(product.name)}</span>
+      <span className="product-illustration" aria-hidden="true">{productEmoji(product.name)}</span>
       <span className={"pill "+(!available?"pill-neutral":"")}>{available?"In stock":"Unavailable"}</span>
     </Link>
     <div className="product-body"><div className="eyebrow">Everyday essentials</div>

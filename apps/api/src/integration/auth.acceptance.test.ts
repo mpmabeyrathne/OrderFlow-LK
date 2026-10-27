@@ -12,7 +12,7 @@ type JsonObject = Record<string, unknown>;
 type ApiResult = { status: number; body: JsonObject };
 const password = "Long-Safe-Example-Passphrase-2026";
 const ids = { customers: [] as string[], users: [] as string[], products: [] as string[], orders: [] as string[] };
-const uniqueEmail = (label: string) => `acceptance-${label}-${randomUUID()}@example.com`;
+const uniqueEmail = (label: string) => `acceptance-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${randomUUID()}@example.com`;
 let server: Server;
 let baseUrl: string;
 let customerA: { id: string; customerId: string; token: string; email: string };
@@ -170,7 +170,7 @@ describe("Authentication acceptance tests (HTTP + PostgreSQL)", () => {
       description: "Updated during staff authorization test",
     }, token);
     expect(product.status).toBe(200);
-    const stock = await api("PATCH", `/products/${productId}/stock`, { stockQuantity: 30 }, token);
+    const stock = await api("PATCH", `/products/${productId}/stock`, { stockQuantity: 30, expectedStockQuantity: 30 }, token);
     expect(stock.status).toBe(200);
     const status = await api("PATCH", `/orders/${foreignOrderId}/status`,
       { status: "confirmed" }, token);

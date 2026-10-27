@@ -27,3 +27,24 @@ jobs:
         run: pnpm --filter @orderflow/api build
       # Live DB tests require a separate, migrated TEST_DB_URL and are intentionally
       # not run on arbitrary PRs or pointed at a shared development database.
+
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.24.0
+          run_install: false
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+      - name: TypeScript frontend typecheck
+        run: pnpm --filter @orderflow/web typecheck
+      - name: Next.js production build
+        run: pnpm --filter @orderflow/web build
+        env:
+          API_INTERNAL_URL: http://localhost:3000

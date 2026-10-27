@@ -1,0 +1,68 @@
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import type { RootState } from "./store";
+import type { ApiEnvelope, AuthResult, AuthUser, CartItem, Order, PageResult, Payment, Product } from "./types";
+
+export type CatalogFilter = { page?: number; limit?: number; search?: string; isActive?: string; sortBy?: string; sortOrder?: string; minPrice?: string; maxPrice?: string };
+const params = (filters: Record<string, string | number | undefined>) => {
+  const query = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => { if (value !== undefined && value !== "") query.set(key, String(value)); });
+  return query.toString();
+};
+export const api = createApi({
+  reducerPath: "api",
+  baseQuery: fetchBaseQuery({
+    baseUrl: "/backend",
+    prepareHeaders(headers, { getState }) {
+      const token = (getState() as RootState).auth.token;
+      if (token) headers.set("authorization", "Bearer " + token);
+      return headers;
+    },
+  }),
+  tagTypes: ["Products", "Cart", "Orders", "Payment"],
+  endpoints: builder => ({
+    products: builder.query<PageResult<Product>, CatalogFilter>({
+      query: f => "/products?" + params({ page: f?.page, limit: f?.limit, search: f?.search, isActive: f?.isActive, sortBy: f?.sortBy, sortOrder: f?.sortOrder, minPrice: f?.minPrice, maxPrice: f?.maxPrice }),
+      providesTags: ["Products"],
+    }),
+    product: builder.query<ApiEnvelope<Product>, string>({ query: id => "/products/" + id, providesTags: ["Products"] }),
+    login: builder.mutation<ApiEnvelope<AuthResult>, {email:string;password:string}>({ query: body => ({ url:"/auth/login", method:"POST", body }) }),
+    register: builder.mutation<ApiEnvelope<AuthResult>, {name:string;email:string;password:string}>({ query: body => ({ url:"/auth/register", method:"POST", body }) }),
+    me: builder.query<ApiEnvelope<AuthUser>, void>({ query: () => "/auth/me" }),
+    cart: builder.query<ApiEnvelope<CartItem[]>, void>({ query: () => "/cart", providesTags: ["Cart"] }),
+    setCart: builder.mutation<ApiEnvelope<unknown>, {productId:string;quantity:number}>({
+      query: ({productId,quantity}) => ({url:"/cart/items/"+productId, method:"PUT", body:{quantity}}),
+      invalidatesTags:["Cart","Products"],
+    }),
+    removeCart: builder.mutation<ApiEnvelope<unknown>, string>({ query: id => ({url:"/cart/items/"+id,method:"DELETE"}),invalidatesTags:["Cart"] }),
+    checkout: builder.mutation<ApiEnvelope<Order>, void>({ query:()=>({url:"/cart/checkout",method:"POST",body:{}}),invalidatesTags:["Cart","Orders","Products"] }),
+    orders: builder.query<PageResult<Order>, {page?:number;status?:string}>({
+      query: f => "/orders?" + params({page:f?.page,limit:10,status:f?.status}),providesTags:["Orders"],
+    }),
+    order: builder.query<{data:Order},string>({query:id=>"/orders/"+id,providesTags:["Orders"]}),
+    payment: builder.query<ApiEnvelope<Payment>,string>({query:id=>"/payments/orders/"+id,providesTags:["Payment"]}),
+    createProduct: builder.mutation<ApiEnvelope<Product>, {name:string;description?:string;price:string;stockQuantity:number;isActive:boolean}>({
+      query: body=>({url:"/products",method:"POST",body}),invalidatesTags:["Products"],
+    }),
+    updateProduct: builder.mutation<ApiEnvelope<Product>, {id:string;body:{name?:string;description?:string;price?:string;isActive?:boolean}}>({
+      query: ({id,body})=>({url:"/products/"+id,method:"PATCH",body}),invalidatesTags:["Products"],
+    }),
+    updateStock: builder.mutation<{data:Product}, {id:string;stockQuantity:number;expectedStockQuantity:number}>({
+      query: ({id,stockQuantity,expectedStockQuantity})=>({url:"/products/"+id+"/stock",method:"PATCH",body:{stockQuantity,expectedStockQuantity}}),
+      invalidatesTags:["Products","Cart"],
+    }),
+    updateOrderStatus: builder.mutation<{data:Order}, {id:string;status:string}>({
+      query: ({id,status})=>({url:"/orders/"+id+"/status",method:"PATCH",body:{status}}),
+      invalidatesTags:["Orders","Payment"],
+    }),
+    simulatePayment: builder.mutation<ApiEnvelope<Payment>, {orderId:string;outcome:"success"|"failure"}>({
+      query: ({orderId,outcome})=>({url:"/payments/orders/"+orderId+"/simulate",method:"POST",body:{outcome}}),
+      invalidatesTags:["Payment"],
+    }),
+  }),
+});
+export const {
+  useProductsQuery, useProductQuery, useLoginMutation, useRegisterMutation, useMeQuery,
+  useCartQuery, useSetCartMutation, useRemoveCartMutation, useCheckoutMutation,
+  useOrdersQuery, useOrderQuery, usePaymentQuery, useSimulatePaymentMutation,
+  useCreateProductMutation, useUpdateProductMutation, useUpdateStockMutation, useUpdateOrderStatusMutation,
+}=api;

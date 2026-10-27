@@ -7,7 +7,10 @@
     "dev:api": "pnpm --filter @orderflow/api dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
-    "test": "pnpm -r test"
+    "test": "pnpm -r test",
+    "dev:web": "pnpm --filter @orderflow/web dev",
+    "build:web": "pnpm --filter @orderflow/web build",
+    "typecheck:web": "pnpm --filter @orderflow/web typecheck"
   },
   "keywords": [],
   "author": "",

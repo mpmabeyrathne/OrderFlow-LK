@@ -70,7 +70,7 @@ test("manager creates a product and updates stock", async ({ page }) => {
   await expect(page.getByText("Product added to catalog.")).toBeVisible();
   expect(createCount).toBe(1);
   await page.getByLabel("Stock for " + product.name).fill("10");
-  await page.getByRole("button", { name: "Update stock" }).click();
+  await page.getByLabel("Stock for " + product.name).locator("xpath=ancestor::*[contains(@class, 'order-row')]").getByRole("button", { name: "Update stock" }).click();
   await expect(page.getByText("Stock updated.")).toBeVisible();
   expect(stockPatch).toEqual({ stockQuantity: 10, expectedStockQuantity: 12 });
 });

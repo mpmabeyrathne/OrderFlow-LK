@@ -17,6 +17,7 @@ let owner: { token: string; id: string; customerId: string };
 let outsider: { token: string; id: string; customerId: string };
 let productId = "";
 let orderId = "";
+let managerToken = "";
 
 async function api(method: string, path: string, token?: string, body?: unknown) {
   const response = await fetch(url + path, {
@@ -50,6 +51,14 @@ async function seedCustomer() {
 beforeAll(async () => {
   owner = await seedCustomer();
   outsider = await seedCustomer();
+  const [manager] = await query.insert(users).values({
+    email: `release-manager-${randomUUID()}@example.com`,
+    role: "manager", customerId: null,
+    passwordHash: await hashPassword("Release-manager-password-2026"),
+  }).returning({ id: users.id });
+  if (!manager) throw new Error("Failed to seed manager");
+  ids.users.push(manager.id);
+  managerToken = signAccessToken({ userId: manager.id, customerId: null, role: "manager" });
   const [product] = await query.insert(products).values({
     name: "Release Checkout Product", price: "12.50", stockQuantity: 6, isActive: true,
   }).returning({ id: products.id });
@@ -139,9 +148,8 @@ describe("Cart checkout & simulated payments (real PostgreSQL)", () => {
 
   it("prevents stock restoration by cancelling a successfully paid order", async () => {
     const result = await api("PATCH", `/orders/${orderId}/status`,
-      undefined, { status: "cancelled" });
-    // Only staff may update fulfillment status.
-    expect(result.status).toBe(401);
+      managerToken, { status: "cancelled" });
+    expect(result.status).toBe(409);
     const [current] = await query.select().from(orders).where(eq(orders.id, orderId));
     expect(current?.status).not.toBe("cancelled");
   });

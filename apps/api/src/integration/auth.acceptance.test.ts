@@ -170,7 +170,7 @@ describe("Authentication acceptance tests (HTTP + PostgreSQL)", () => {
       description: "Updated during staff authorization test",
     }, token);
     expect(product.status).toBe(200);
-    const stock = await api("PATCH", `/products/${productId}/stock`, { stockQuantity: 30 }, token);
+    const stock = await api("PATCH", `/products/${productId}/stock`, { stockQuantity: 30, expectedStockQuantity: 30 }, token);
     expect(stock.status).toBe(200);
     const status = await api("PATCH", `/orders/${foreignOrderId}/status`,
       { status: "confirmed" }, token);

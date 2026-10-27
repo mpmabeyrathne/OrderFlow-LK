@@ -17,7 +17,7 @@ export default function CartPage(){
  const items=data?.data??[],total=items.reduce((sum,p)=>sum+Number(p.price)*p.quantity,0),count=items.reduce((sum,p)=>sum+p.quantity,0);
  async function change(id:string,quantity:number){setMessage("");try{if(quantity===0)await remove(id).unwrap();else await setCart({productId:id,quantity}).unwrap();}catch(e){setMessage(errorMessage(e));}}
  async function placeOrder(){setMessage("");try{const o=await checkout().unwrap();router.push("/orders/"+o.data.id);}catch(e){setMessage(errorMessage(e));}}
- if(!hydrated)return <div className="spinner"/>;
+ if(!hydrated||(token&&!user))return <div className="spinner"/>;
  if(!token)return <div className="shell"><div className="empty" style={{marginTop:50}}><ShoppingBag size={40}/><h3>Sign in to view your cart</h3><p className="muted">Your shopping cart is saved to your account.</p><Link href="/login?next=/cart" className="btn">Sign in</Link></div></div>;
  if(user?.role!=="customer")return <div className="shell"><div className="empty" style={{marginTop:50}}><h3>Customer checkout only</h3><Link href="/staff" className="btn">Open staff dashboard</Link></div></div>;
  return <div className="shell"><div className="page-heading"><div className="eyebrow">YOUR SELECTION</div><h1>Shopping cart</h1><p>{count} item{count===1?"":"s"} in your cart</p></div>

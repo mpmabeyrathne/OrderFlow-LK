@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import type { AddressInfo } from "node:net";
 import type { Server } from "node:http";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
@@ -13,12 +12,13 @@ const mocks = vi.hoisted(() => ({
     pagination: { page: filters.page, limit: filters.limit, total: 1, totalPages: 1 },
   })),
 }));
-const userId = randomUUID(), customerId = randomUUID(), managerId = randomUUID();
+const ids = vi.hoisted(() => ({ userId: "01fb35a8-e158-4f90-aa2f-5fcb22b1c61b", customerId: "25ea2dc5-72cc-4798-998c-e05249a1fd3c", managerId: "31bc9181-8fc5-4492-a4a7-f52be1e3ed98" }));
+const { userId, customerId, managerId } = ids;
 vi.mock("../repositories/auth.repository.js", () => ({
   default: {
     findById: vi.fn(async (id: string) =>
-      id === userId ? { id, role: "customer", customerId } :
-      id === managerId ? { id, role: "manager", customerId: null } : null),
+      id === ids.userId ? { id, role: "customer", customerId: ids.customerId } :
+      id === ids.managerId ? { id, role: "manager", customerId: null } : null),
   },
 }));
 vi.mock("../services/product.service.js", () => ({

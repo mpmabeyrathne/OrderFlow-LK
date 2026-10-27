@@ -1,5 +1,6 @@
 import orderRepository from "../repositories/order.repository.js";
 import type { CreateOrderInput } from "../validators/order.validator.js";
+import type { OrderListQuery } from "../validators/list-query.validator.js";
 import { AppError } from "../utils/app-error.js";
 import productRepository from "../repositories/product.repository.js";
 
@@ -62,8 +63,8 @@ class OrderService {
     );
   }
 
-  async getOrders(customerId?: string) {
-    return orderRepository.findAll(customerId);
+  async getOrders(filters: OrderListQuery, customerId?: string) {
+    return orderRepository.findAll(filters, customerId);
   }
 
   async getOrderById(id: string, customerId?: string) {

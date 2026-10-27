@@ -2,6 +2,7 @@
 import type { Request, Response, NextFunction } from "express";
 import logger from "../config/logger.js";
 import productService from "../services/product.service.js";
+import { productListSchema, parseListQuery } from "../validators/list-query.validator.js";
 
 class ProductController {
     createProduct = async (
@@ -24,16 +25,18 @@ class ProductController {
     };
 
     getProducts = async (
-        _req: Request,
+        req: Request,
         res: Response,
         next: NextFunction,
     ) => {
         try {
-            const products = await productService.getProducts();
+            const filters = parseListQuery(productListSchema, req.query);
+            const result = await productService.getProducts(filters);
 
             return res.status(200).json({
                 success: true,
-                data: products,
+                data: result.data,
+                pagination: result.pagination,
             });
         } catch (error) {
             return next(error);

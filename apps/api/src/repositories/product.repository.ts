@@ -1,5 +1,6 @@
 
-import { and, eq, gte, inArray, sql } from "drizzle-orm";
+import { and, eq, gte, lte, ilike, asc, desc, sql, type SQL } from "drizzle-orm";
+import type { ProductListQuery } from "../validators/list-query.validator.js";
 import { query } from "../db/index.js";
 import { products } from "../db/schema.js";
 
@@ -28,8 +29,24 @@ class ProductRepository {
         return product;
     }
 
-    async findAll() {
-        return query.select().from(products);
+    async findAll(filters: ProductListQuery) {
+        const conditions: SQL[] = [];
+        if (filters.search) conditions.push(ilike(products.name, "%" + filters.search.replace(/[\\%_]/g, (char) => "\\" + char) + "%"));
+        if (filters.isActive) conditions.push(eq(products.isActive, filters.isActive === "true"));
+        if (filters.minPrice !== undefined) conditions.push(gte(products.price, filters.minPrice.toFixed(2)));
+        if (filters.maxPrice !== undefined) conditions.push(lte(products.price, filters.maxPrice.toFixed(2)));
+        const where = conditions.length ? and(...conditions) : undefined;
+        const col = filters.sortBy === "price" ? products.price : filters.sortBy === "name" ? products.name : products.createdAt;
+        const sort = filters.sortOrder === "asc" ? asc(col) : desc(col);
+        const offset = (filters.page - 1) * filters.limit;
+        const [rows, countRows] = await Promise.all([
+            query.select().from(products).where(where).orderBy(sort, asc(products.id))
+                .limit(filters.limit).offset(offset),
+            query.select({ total: sql<number>`count(*)::int` }).from(products).where(where),
+        ]);
+        const total = countRows[0]?.total ?? 0;
+        return { data: rows, pagination: { page: filters.page, limit: filters.limit,
+            total, totalPages: Math.ceil(total / filters.limit) } };
     }
 
     async findById(id: string) {

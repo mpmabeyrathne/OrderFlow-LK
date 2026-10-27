@@ -32,8 +32,6 @@ class ProductRepository {
     async findAll(filters: ProductListQuery) {
         const conditions: SQL[] = [];
         if (filters.search) conditions.push(ilike(products.name, "%" + filters.search.replace(/[\\%_]/g, (char) => "\\" + char) + "%"));
-        return query.select().from(products);
-    }") + "%"));
         if (filters.isActive) conditions.push(eq(products.isActive, filters.isActive === "true"));
         if (filters.minPrice !== undefined) conditions.push(gte(products.price, filters.minPrice.toFixed(2)));
         if (filters.maxPrice !== undefined) conditions.push(lte(products.price, filters.maxPrice.toFixed(2)));

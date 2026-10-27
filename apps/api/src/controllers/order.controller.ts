@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import orderService from "../services/order.service.js";
+import { orderListSchema, parseListQuery } from "../validators/list-query.validator.js";
 
 class OrderController {
   createOrder = async (
@@ -28,10 +29,12 @@ class OrderController {
     next: NextFunction,
   ) => {
     try {
-      const visible = await orderService.getOrders(req.auth!.role === "customer" ? req.auth!.customerId! : undefined);
+      const filters = parseListQuery(orderListSchema, req.query);
+      const visible = await orderService.getOrders(filters, req.auth!.role === "customer" ? req.auth!.customerId! : undefined);
   
       res.status(200).json({
-        data: visible,
+        data: visible.data,
+        pagination: visible.pagination,
       });
     } catch (error: unknown) {
       next(error);

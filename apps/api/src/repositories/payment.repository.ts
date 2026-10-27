@@ -5,15 +5,6 @@ import { AppError } from "../utils/app-error.js";
 
 export type PaymentOutcome = "success" | "failure";
 class PaymentRepository {
-  async findForOrder(orderId: string, customerId: string) {
-    const [order] = await query.select({ id: orders.id }).from(orders)
-      .where(eq(orders.id, orderId)).limit(1);
-    if (!order) throw new AppError(404, "Order not found");
-    // The ownership check is enforced by service before calling for non-staff users.
-    const [payment] = await query.select().from(payments).where(eq(payments.orderId, orderId)).limit(1);
-    return payment ?? null;
-  }
-
   async simulate(orderId: string, customerId: string, outcome: PaymentOutcome) {
     return query.transaction(async tx => {
       // Serializing on the order row makes repeat requests deterministic.

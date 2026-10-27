@@ -70,7 +70,7 @@ beforeAll(async () => {
     server!.once("listening", resolve);
     server!.once("error", reject);
   });
-  url = "http://127.0.0.1:" + (server.address() as AddressInfo).port;
+  url = "http://127.0.0.1:" + (server!.address() as AddressInfo).port;
 }, 60000);
 
 afterAll(async () => {
@@ -118,6 +118,15 @@ describe("Cart checkout & simulated payments (real PostgreSQL)", () => {
     const foreignOrders = await api("GET", "/orders", outsider.token);
     expect(foreignOrders.status).toBe(200);
     expect((foreignOrders.json.data as Array<{ id: string }>).some(o => o.id === orderId)).toBe(false);
+  });
+
+  it("runs product search and price filtering against real PostgreSQL", async () => {
+    const result = await api("GET",
+      "/products?search=release%20checkout%20product&minPrice=12.50&maxPrice=12.50&page=1&limit=10&sortBy=price");
+    expect(result.status).toBe(200);
+    const rows = result.json.data as Array<{ id: string }>;
+    expect(rows.some(row => row.id === productId)).toBe(true);
+    expect((result.json.pagination as { total: number }).total).toBeGreaterThanOrEqual(1);
   });
 
   it("prevents another customer from reading or simulating a payment", async () => {

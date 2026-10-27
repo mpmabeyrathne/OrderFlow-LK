@@ -1,6 +1,6 @@
 # OrderFlow-LK
 
-OrderFlow-LK is a Node.js + TypeScript REST API for customer accounts, catalog inventory, order processing, customer carts, and simulated payments. The data layer uses PostgreSQL with Drizzle ORM.
+OrderFlow-LK is a full-stack e-commerce portfolio project. The backend is a Node.js + TypeScript REST API with PostgreSQL/Drizzle ORM, and `apps/web` is a Next.js + Redux Toolkit storefront with customer checkout and a staff dashboard. Simulated payments do not move money.
 
 ## Get started
 
@@ -13,15 +13,14 @@ pnpm --filter @orderflow/api db:migrate
 pnpm --filter @orderflow/api dev
 ```
 
-The API starts on port 3000 by default. Check `GET /health`.
+The API starts on port 3000 by default. Check `GET /health`.\n\n## Run the Next.js storefront\n\n```powershell\npnpm install\nCopy-Item apps/web/.env.example apps/web/.env.local\n# With the API running in another terminal:\npnpm --filter @orderflow/web dev\n```\n\nOpen http://localhost:3001. The Next.js server proxies `/backend/*` to the API. Staff accounts are created using the backend's provisioning workflow. See [web app setup and routes](apps/web/README.md).\n\n**First install after adding the web workspace:** generate and commit the updated `pnpm-lock.yaml` with `pnpm install`. CI uses `--frozen-lockfile`.
 
 ## Quality checks
 
 ```sh
 pnpm --filter @orderflow/api typecheck
 pnpm --filter @orderflow/api test
-pnpm --filter @orderflow/api build
-```
+pnpm --filter @orderflow/api build\npnpm --filter @orderflow/web typecheck\npnpm --filter @orderflow/web build\n```
 
 Optional database-backed acceptance tests (not required for this CV portfolio) require a separately migrated `TEST_DB_URL`, distinct from `DB_URL`. Never run these tests against your main development data:
 

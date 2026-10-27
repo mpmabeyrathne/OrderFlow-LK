@@ -40,6 +40,20 @@ export const api = createApi({
     }),
     order: builder.query<{data:Order},string>({query:id=>"/orders/"+id,providesTags:["Orders"]}),
     payment: builder.query<ApiEnvelope<Payment>,string>({query:id=>"/payments/orders/"+id,providesTags:["Payment"]}),
+    createProduct: builder.mutation<ApiEnvelope<Product>, {name:string;description?:string;price:string;stockQuantity:number;isActive:boolean}>({
+      query: body=>({url:"/products",method:"POST",body}),invalidatesTags:["Products"],
+    }),
+    updateProduct: builder.mutation<ApiEnvelope<Product>, {id:string;body:{name?:string;description?:string;price?:string;isActive?:boolean}}>({
+      query: ({id,body})=>({url:"/products/"+id,method:"PATCH",body}),invalidatesTags:["Products"],
+    }),
+    updateStock: builder.mutation<{data:Product}, {id:string;stockQuantity:number;expectedStockQuantity:number}>({
+      query: ({id,stockQuantity,expectedStockQuantity})=>({url:"/products/"+id+"/stock",method:"PATCH",body:{stockQuantity,expectedStockQuantity}}),
+      invalidatesTags:["Products","Cart"],
+    }),
+    updateOrderStatus: builder.mutation<{data:Order}, {id:string;status:string}>({
+      query: ({id,status})=>({url:"/orders/"+id+"/status",method:"PATCH",body:{status}}),
+      invalidatesTags:["Orders","Payment"],
+    }),
     simulatePayment: builder.mutation<ApiEnvelope<Payment>, {orderId:string;outcome:"success"|"failure"}>({
       query: ({orderId,outcome})=>({url:"/payments/orders/"+orderId+"/simulate",method:"POST",body:{outcome}}),
       invalidatesTags:["Payment"],
@@ -50,4 +64,5 @@ export const {
   useProductsQuery, useProductQuery, useLoginMutation, useRegisterMutation, useMeQuery,
   useCartQuery, useSetCartMutation, useRemoveCartMutation, useCheckoutMutation,
   useOrdersQuery, useOrderQuery, usePaymentQuery, useSimulatePaymentMutation,
+  useCreateProductMutation, useUpdateProductMutation, useUpdateStockMutation, useUpdateOrderStatusMutation,
 }=api;

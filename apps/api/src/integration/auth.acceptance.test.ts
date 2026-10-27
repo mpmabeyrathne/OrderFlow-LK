@@ -12,7 +12,7 @@ type JsonObject = Record<string, unknown>;
 type ApiResult = { status: number; body: JsonObject };
 const password = "Long-Safe-Example-Passphrase-2026";
 const ids = { customers: [] as string[], users: [] as string[], products: [] as string[], orders: [] as string[] };
-const uniqueEmail = (label: string) => `acceptance-${label}-${randomUUID()}@example.com`;
+const uniqueEmail = (label: string) => `acceptance-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${randomUUID()}@example.com`;
 let server: Server;
 let baseUrl: string;
 let customerA: { id: string; customerId: string; token: string; email: string };

@@ -1,4 +1,5 @@
-import { and, eq, gte, inArray, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, sql, asc, desc, type SQL } from "drizzle-orm";
+import type { OrderListQuery } from "../validators/list-query.validator.js";
 import { query } from "../db/index.js";
 import { customers, products, orders, orderItems } from "../db/schema.js";
 import type { CreateOrderInput } from "../validators/order.validator.js";
@@ -92,9 +93,21 @@ class OrderRepository {
     });
   }
 
-  async findAll(customerId?: string) {
-    const statement = query.select().from(orders);
-    return customerId ? statement.where(eq(orders.customerId, customerId)) : statement;
+  async findAll(filters: OrderListQuery, customerId?: string) {
+    const conditions: SQL[] = [];
+    if (customerId) conditions.push(eq(orders.customerId, customerId));
+    if (filters.status) conditions.push(eq(orders.status, filters.status));
+    const where = conditions.length ? and(...conditions) : undefined;
+    const offset = (filters.page - 1) * filters.limit;
+    const sorting = filters.sortOrder === "asc" ? asc(orders.createdAt) : desc(orders.createdAt);
+    const [rows, countRows] = await Promise.all([
+      query.select().from(orders).where(where).orderBy(sorting, asc(orders.id))
+        .limit(filters.limit).offset(offset),
+      query.select({ total: sql<number>`count(*)::int` }).from(orders).where(where),
+    ]);
+    const total = countRows[0]?.total ?? 0;
+    return { data: rows, pagination: { page: filters.page, limit: filters.limit,
+      total, totalPages: Math.ceil(total / filters.limit) } };
   }
 
   async findItemsByOrderId(orderId: string) {

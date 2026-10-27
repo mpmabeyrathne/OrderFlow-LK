@@ -1,7 +1,7 @@
 import { and, eq, gte, inArray, sql, asc, desc, type SQL } from "drizzle-orm";
 import type { OrderListQuery } from "../validators/list-query.validator.js";
 import { query } from "../db/index.js";
-import { customers, products, orders, orderItems } from "../db/schema.js";
+import { customers, products, orders, orderItems, payments } from "../db/schema.js";
 import type { CreateOrderInput } from "../validators/order.validator.js";
 import { AppError } from "../utils/app-error.js";
 
@@ -158,6 +158,13 @@ async cancelOrder(id: string) {
     if (order.status === "cancelled") {
       return order;
     }
+
+    // A successfully simulated payment cannot be cancelled as an unpaid order.
+    // The eventual real-payment implementation must use a refund workflow.
+    const [paid] = await tx.select({ id: payments.id }).from(payments)
+      .where(and(eq(payments.orderId, id), eq(payments.status, "succeeded")))
+      .limit(1);
+    if (paid) throw new AppError(409, "Paid orders require a refund workflow before cancellation");
 
     const items = await tx
       .select()

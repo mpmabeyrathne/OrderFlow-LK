@@ -137,6 +137,15 @@ describe("Cart checkout & simulated payments (real PostgreSQL)", () => {
     expect(fetched.status).toBe(200);
   });
 
+  it("prevents stock restoration by cancelling a successfully paid order", async () => {
+    const result = await api("PATCH", `/orders/${orderId}/status`,
+      undefined, { status: "cancelled" });
+    // Only staff may update fulfillment status.
+    expect(result.status).toBe(401);
+    const [current] = await query.select().from(orders).where(eq(orders.id, orderId));
+    expect(current?.status).not.toBe("cancelled");
+  });
+
   it("rolls back failed checkout without removing cart items", async () => {
     expect((await api("PUT", `/cart/items/${productId}`, owner.token, { quantity: 4 })).status).toBe(200);
     await query.update(products).set({ stockQuantity: 1 }).where(eq(products.id, productId));

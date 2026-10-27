@@ -39,6 +39,15 @@ export const cartItems = pgTable("cart_items", {
   check("cart_items_quantity_positive", sql`${table.quantity} > 0 AND ${table.quantity} <= 100`),
 ]);
 
+export const paymentStatusEnum = pgEnum("payment_status", ["succeeded", "failed"]);
+export const payments = pgTable("payments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orderId: uuid("order_id").notNull().unique().references(() => orders.id, { onDelete: "restrict" }),
+  amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 3 }).notNull(),
+  status: paymentStatusEnum("status").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [check("payments_amount_nonnegative", sql`${table.amount} >= 0`)]);
 export const orderStatusEnum = pgEnum("order_status", [
   "pending",
   "confirmed",

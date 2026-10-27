@@ -16,7 +16,7 @@ export function Header() {
   const logout=()=>{ dispatch(signedOut());dispatch(api.util.resetApiState());router.push("/"); };
   return <header className="header"><div className="shell nav">
     <Link href="/" className="brand"><span className="brand-icon"><Sprout size={23}/></span>orderflow<span style={{color:"#80a45e"}}>.</span></Link>
-    <nav className="nav-links" aria-label="Main navigation"><Link href="/" aria-current={pathname==="/"?"page":undefined}>Home</Link><Link href="/shop">Shop all</Link><Link href="/orders">My orders</Link><Link href="/about">About project</Link></nav>
+    <nav className="nav-links" aria-label="Main navigation"><Link href="/" aria-current={pathname==="/"?"page":undefined}>Home</Link><Link href="/shop">Shop all</Link><Link href="/orders">My orders</Link><Link href="/about">About project</Link>{user?.role==="admin"||user?.role==="manager"?<Link href="/staff">Dashboard</Link>:null}</nav>
     <div className="nav-actions">
       <Link className="icon-button" href="/cart" aria-label={"View cart: "+count+" items"}><ShoppingBag size={18}/>{count>0?<span>{count}</span>:null}</Link>
       {token?<button className="icon-button" onClick={logout} title="Sign out"><LogOut size={17}/><span className="small">Log out</span></button>:<Link className="icon-button" href="/login"><UserRound size={17}/><span className="small">Sign in</span></Link>}

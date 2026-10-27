@@ -20,7 +20,7 @@ export const api = createApi({
   }),
   tagTypes: ["Products", "Cart", "Orders", "Payment"],
   endpoints: builder => ({
-    products: builder.query<PageResult<Product>, CatalogFilter | void>({
+    products: builder.query<PageResult<Product>, CatalogFilter>({
       query: f => "/products?" + params({ page: f?.page, limit: f?.limit, search: f?.search, isActive: f?.isActive, sortBy: f?.sortBy, sortOrder: f?.sortOrder, minPrice: f?.minPrice, maxPrice: f?.maxPrice }),
       providesTags: ["Products"],
     }),
@@ -35,7 +35,7 @@ export const api = createApi({
     }),
     removeCart: builder.mutation<ApiEnvelope<unknown>, string>({ query: id => ({url:"/cart/items/"+id,method:"DELETE"}),invalidatesTags:["Cart"] }),
     checkout: builder.mutation<ApiEnvelope<Order>, void>({ query:()=>({url:"/cart/checkout",method:"POST",body:{}}),invalidatesTags:["Cart","Orders","Products"] }),
-    orders: builder.query<PageResult<Order>, {page?:number;status?:string} | void>({
+    orders: builder.query<PageResult<Order>, {page?:number;status?:string}>({
       query: f => "/orders?" + params({page:f?.page,limit:10,status:f?.status}),providesTags:["Orders"],
     }),
     order: builder.query<{data:Order},string>({query:id=>"/orders/"+id,providesTags:["Orders"]}),

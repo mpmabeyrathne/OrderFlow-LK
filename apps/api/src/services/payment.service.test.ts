@@ -19,8 +19,11 @@ describe("payment ownership and service", () => {
     await paymentService.get(customer, orderId);
     expect(mock.get).toHaveBeenCalledWith(orderId, customerId);
   });
-  it("rejects staff callers", async () => {
-    await expect(paymentService.simulate({ role: "admin", userId: randomUUID(), customerId: null }, orderId, "success"))
-      .rejects.toMatchObject({ statusCode: 403 });
+  it("rejects staff callers", () => {
+    expect(() => paymentService.simulate(
+      { role: "admin", userId: randomUUID(), customerId: null },
+      orderId,
+      "success",
+    )).toThrowError("Customer role required");
   });
 });

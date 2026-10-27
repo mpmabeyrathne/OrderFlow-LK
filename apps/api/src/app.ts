@@ -6,6 +6,7 @@ import productRoutes from "./routes/product.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
+import paymentRoutes from "./routes/payment.routes.js";
 
 export const app: Express = express();
 app.use(express.json());
@@ -18,4 +19,5 @@ app.use("/customers", customerRoutes);
 app.use("/products", productRoutes);
 app.use("/orders", orderRoutes);
 app.use("/cart", cartRoutes);
+app.use("/payments", paymentRoutes);
 app.use(errorHandler);

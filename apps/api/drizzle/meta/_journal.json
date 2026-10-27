@@ -29,6 +29,13 @@
       "when": 1792760000000,
       "tag": "0003_cart_checkout",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792761000000,
+      "tag": "0004_simulated_payments",
+      "breakpoints": true
     }
   ]
 }

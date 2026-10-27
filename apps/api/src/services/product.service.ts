@@ -4,14 +4,15 @@ import productRepository, {
     type UpdateProductData,
 } from "../repositories/product.repository.js";
 import { AppError } from "../utils/app-error.js";
+import type { ProductListQuery } from "../validators/list-query.validator.js";
 
 class ProductService {
     createProduct(data: CreateProductData) {
         return productRepository.create(data);
     }
 
-    getProducts() {
-        return productRepository.findAll();
+    getProducts(filters: ProductListQuery) {
+        return productRepository.findAll(filters);
     }
 
     getProductById(id: string) {

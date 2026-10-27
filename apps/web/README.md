@@ -45,6 +45,8 @@ After installation, commit the generated changes to `pnpm-lock.yaml` before trea
 ```powershell
 pnpm --filter @orderflow/web typecheck
 pnpm --filter @orderflow/web build
+pnpm --filter @orderflow/web exec playwright install chromium
+pnpm --filter @orderflow/web test:e2e
 ```
 
 ## Portfolio caveats
@@ -54,3 +56,9 @@ pnpm --filter @orderflow/web build
 - Product visuals are emoji illustrations, not uploaded images: the API has no image field.
 - No additional testing database is required for the portfolio demo.
 - Do not reuse the session-storage token pattern for an internet-facing production service without a security review.
+
+## Automated UI testing
+
+See [Playwright test guide](e2e/README.md). Mocked network responses mean the suite needs no PostgreSQL instance or test database. It runs on desktop Chromium and mobile Chromium. Coverage includes the availability-badge visual regression, product cards, catalog search, product navigation, guest redirects and customer sign-in/cart behavior.
+
+Before running, install workspace dependencies with `pnpm install` and install the Chromium browser with `pnpm --filter @orderflow/web exec playwright install chromium`. The workspace lockfile must be regenerated and committed by running `pnpm install` locally; otherwise frozen-lockfile CI can fail.

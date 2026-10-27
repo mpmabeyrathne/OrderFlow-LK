@@ -23,7 +23,7 @@ pnpm --filter @orderflow/api test
 pnpm --filter @orderflow/api build
 ```
 
-Database-backed acceptance tests require a separately migrated `TEST_DB_URL`, distinct from `DB_URL`:
+Optional database-backed acceptance tests (not required for this CV portfolio) require a separately migrated `TEST_DB_URL`, distinct from `DB_URL`. Never run these tests against your main development data:
 
 ```sh
 pnpm --filter @orderflow/api test:integration
@@ -38,4 +38,4 @@ See [OpenAPI specification](apps/api/openapi.json), [release checklist](apps/api
 - [Simulated payments](apps/api/PAYMENTS.md)
 - [Pagination, filtering, search](apps/api/PAGINATION_SEARCH.md)
 
-**Important:** Payment outcomes are simulated; no real funds are charged. Deployment, database transaction verification, and production controls need completion before a public launch.
+**Portfolio scope:** This repository demonstrates backend API architecture, role-based access, stock concurrency and automated mock acceptance testing. The user-reported baseline was 88 passing unit/mock tests plus successful TypeScript build. These results do not validate real database transaction behavior. Payment outcomes are simulated; no money moves. Deployment, database integration verification, and production controls are optional follow-up work, not portfolio-completion requirements.

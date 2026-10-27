@@ -29,6 +29,11 @@ pnpm --filter @orderflow/web exec playwright show-report
 - Product detail navigation
 - Guest add-to-cart redirects to login
 - Customer sign-in, Redux session and cart display
+- Customer checkout, successful/failed simulated payments, payment persistence after reload
+- Checkout rejection with cart preserved and server validation message
+- Order history filtering
+- Customer restrictions on staff dashboard
+- Manager product creation, stock optimistic-concurrency request, and order status update
 
 The mock tests demonstrate UI behavior, not PostgreSQL transaction correctness. Add a separate live-API smoke suite only if a safe set of development test records is available.
 

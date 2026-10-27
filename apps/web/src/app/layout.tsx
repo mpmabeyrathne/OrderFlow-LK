@@ -8,5 +8,5 @@ export const metadata: Metadata = {
   description: "Discover everyday essentials and experience the OrderFlow shopping demo.",
 };
 export default function RootLayout({children}:{children:React.ReactNode}) {
-  return <html lang="en"><body><Providers><div className="announcement">A FULL-STACK E-COMMERCE PORTFOLIO PROJECT • SIMULATED PAYMENTS ONLY</div><Header/><main>{children}</main><Footer/></Providers></body></html>;
+  return <html lang="en"><body><Providers><Header/><main>{children}</main><Footer/></Providers></body></html>;
 }

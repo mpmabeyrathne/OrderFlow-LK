@@ -48,3 +48,32 @@ jobs:
         run: pnpm --filter @orderflow/web build
         env:
           API_INTERNAL_URL: http://localhost:3000
+
+  playwright:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.24.0
+          run_install: false
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright Chromium
+        run: pnpm --filter @orderflow/web exec playwright install --with-deps chromium
+      - name: Run desktop and mobile browser UI tests (mocked API)
+        run: pnpm --filter @orderflow/web test:e2e
+      - name: Upload Playwright report if tests fail
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            apps/web/playwright-report/
+            apps/web/test-results/
+          if-no-files-found: ignore
+          retention-days: 7

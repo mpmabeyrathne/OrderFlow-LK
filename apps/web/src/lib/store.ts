@@ -1,5 +1,4 @@
 import { configureStore, createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { setupListeners } from "@reduxjs/toolkit/query";
 import { api } from "./api";
 import type { AuthUser } from "./types";
 
@@ -33,4 +32,3 @@ export const makeStore = () => configureStore({
 export type AppStore = ReturnType<typeof makeStore>;
 export type RootState = ReturnType<AppStore["getState"]>;
 export type AppDispatch = AppStore["dispatch"];
-setupListeners(() => () => {});
